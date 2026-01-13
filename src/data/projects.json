@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "E-commerce API Documentation",
+    "description": "Dynamic E-Commerce Workflow Management. The system features dynamic routes for order processing, real-time inventory updates, and secure user authentication. It also supports seamless automated order reporting and comprehensive product management. Documented Backend API published publicly using Postman.",
+    "image": "/images/ecommerce-api-illustration.jpg"
+  },
+  {
+    "id": 2,
+    "title": "Course Booking API Documentation",
+    "description": "RESTful API for managing course enrollments, featuring user registration, authentication, and retrieval of user details. Supports course creation, updates, archiving, activation, and student enrollment. Publicly documented using Postman.",
+    "image": "/images/course-booking-api-illustration.jpg"
+  },
+  {
+    "id": 3,
+    "title": "Course booking App",
+    "description": "A MERN-stack course enrollment system featuring user registration, authentication, and profile management. Authenticated users can create, update, archive, and activate courses. The platform also allows users to browse available courses and enroll seamlessly.",
+    "image": "/images/course-booking-app-illustration.jpg"
+  },
+  {
+    "id": 4,
+    "title": "E-commerce App",
+    "description": "A responsive front-end application built with React, focusing on mobile-first design and modern UX/UI principles. Features product browsing, shopping cart management, and a complete checkout workflow with dynamic form validation. Integrated with a mock API for seamless data fetching.",
+    "image": "/images/ecommerce-app-illustration.jpg"
+  },
+  {
+    "id": 5,
+    "title": "Airline Booking System Mockup",
+    "description": "High-fidelity static mockup created using HTML and pure CSS/Bootstrap. Designed to showcase a modern airline booking interface with responsive design and attention to detail.",
+    "image": "/images/airline-mockup-illustration.jpg"
+  }
+]
