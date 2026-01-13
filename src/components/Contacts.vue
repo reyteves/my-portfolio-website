@@ -63,6 +63,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { Notyf } from 'notyf'
+import 'notyf/notyf.min.css'
+
+const WEB3FORMS_ACCESS_KEY = "07ada775-4cc0-4877-8aa6-55deb652253c"
 
 const form = ref({
   fullName: '',
@@ -74,34 +78,46 @@ const isSubmitting = ref(false)
 const showAlert = ref(false)
 const alertMessage = ref('')
 
+const notyf = new Notyf()
+
 const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_ACCESS_KEY,
+        name: form.value.fullName,
+        email: form.value.email,
+        message: form.value.message,
+      }),
+    })
     
-    alertMessage.value = 'Thank you for your message! I\'ll get back to you soon.'
-    showAlert.value = true
+    const result = await response.json()
     
-    // Reset form
-    form.value = {
-      fullName: '',
-      email: '',
-      message: ''
+    if (result.success) {
+      console.log(result)
+      form.value = {
+        fullName: '',
+        email: '',
+        message: ''
+      }
+      isSubmitting.value = false
+      notyf.success("Message sent successfully")
+    } else {
+      console.error('Submission failed:', result)
+      isSubmitting.value = false
+      notyf.error(result.message || "Message failed to send")
     }
-    
-    // Hide alert after 5 seconds
-    setTimeout(() => {
-      showAlert.value = false
-    }, 5000)
-    
   } catch (error) {
-    console.error('Error submitting form:', error)
-    alertMessage.value = 'Oops! Something went wrong. Please try again.'
-    showAlert.value = true
-  } finally {
+    console.log(error)
     isSubmitting.value = false
+    notyf.error("Message failed to send")
   }
 }
 </script>
