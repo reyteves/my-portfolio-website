@@ -84,7 +84,7 @@ const alertMessage = ref('')
 
 const notyf = new Notyf()
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   const response = grecaptcha.getResponse();
   if (response.length === 0) {
     notyf.error("Please complete the captcha");
@@ -94,7 +94,7 @@ const handleSubmit = () => {
   isSubmitting.value = true
   
   try {
-    const response = fetch("https://api.web3forms.com/submit", {
+    const res = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -109,7 +109,7 @@ const handleSubmit = () => {
       }),
     })
     
-    const result = response.json()
+    const result = await res.json()
     
     if (result.success) {
       console.log(result)
