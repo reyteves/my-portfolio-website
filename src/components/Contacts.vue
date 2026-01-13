@@ -49,6 +49,10 @@
                 </a>
               </div>
             </div>
+            
+            <div class="d-flex justify-content-end mt-3">
+              <div ref="recaptchaContainer"></div>
+            </div>
           </form>
 
           <div v-if="showAlert" class="alert alert-success mt-4" role="alert">
@@ -62,11 +66,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Notyf } from 'notyf'
 import 'notyf/notyf.min.css'
 
 const WEB3FORMS_ACCESS_KEY = "07ada775-4cc0-4877-8aa6-55deb652253c"
+const SITE_KEY = "6LeFSEksAAAAAAvVeDfUn3tjbH4EgQqczO71PBPH"
 
 const form = ref({
   fullName: '',
@@ -77,10 +82,60 @@ const form = ref({
 const isSubmitting = ref(false)
 const showAlert = ref(false)
 const alertMessage = ref('')
+const recaptchaContainer = ref(null)
+const recaptchaWidgetId = ref(null)
+const recaptchaToken = ref('')
 
 const notyf = new Notyf()
 
+function onRecaptchaSuccess(token) {
+  recaptchaToken.value = token
+}
+
+function onRecaptchaExpired() {
+  recaptchaToken.value = ''
+}
+
+function renderRecaptcha() {
+  if (!window.grecaptcha) {
+    console.error('reCAPTCHA not loaded')
+    return
+  }
+
+  recaptchaWidgetId.value = window.grecaptcha.render(recaptchaContainer.value, {
+    sitekey: SITE_KEY,
+    size: 'normal',
+    callback: onRecaptchaSuccess,
+    'expired-callback': onRecaptchaExpired,
+  })
+}
+
+function resetRecaptcha() {
+  if (recaptchaWidgetId.value !== null) {
+    window.grecaptcha.reset(recaptchaWidgetId.value)
+    recaptchaToken.value = ''
+  }
+}
+
+onMounted(() => {
+  const interval = setInterval(() => {
+    if (window.grecaptcha && window.grecaptcha.render) {
+      renderRecaptcha()
+      clearInterval(interval)
+    }
+  }, 100)
+
+  onBeforeUnmount(() => {
+    clearInterval(interval)
+  })
+})
+
 const handleSubmit = async () => {
+  if (!recaptchaToken.value) {
+    notyf.error("Please verify that you are not a robot")
+    return
+  }
+
   isSubmitting.value = true
   
   try {
@@ -95,6 +150,7 @@ const handleSubmit = async () => {
         name: form.value.fullName,
         email: form.value.email,
         message: form.value.message,
+        "g-recaptcha-response": recaptchaToken.value,
       }),
     })
     
@@ -102,6 +158,7 @@ const handleSubmit = async () => {
     
     if (result.success) {
       console.log(result)
+      resetRecaptcha()
       form.value = {
         fullName: '',
         email: '',
