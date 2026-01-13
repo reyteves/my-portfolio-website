@@ -71,7 +71,7 @@ import { Notyf } from 'notyf'
 import 'notyf/notyf.min.css'
 
 const WEB3FORMS_ACCESS_KEY = "07ada775-4cc0-4877-8aa6-55deb652253c"
-const SITE_KEY = "6LeFSEksAAAAAAvVeDfUn3tjbH4EgQqczO71PBPH"
+const SITE_KEY = " 6LexcEksAAAAAE6p5TuSCalNzb17lv2WfU2jfhe6"
 
 const form = ref({
   fullName: '',
