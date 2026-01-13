@@ -51,7 +51,7 @@
             </div>
             
             <div class="d-flex justify-content-end mt-3">
-              <div class="g-recaptcha" data-sitekey="6LdbdUksAAAAAHH80K5Ye_EeubJnTHq3uAXWjlYx"></div>
+              <div ref="recaptchaContainer"></div>
             </div>
           </form>
 
@@ -66,11 +66,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Notyf } from 'notyf'
 import 'notyf/notyf.min.css'
 
 const WEB3FORMS_ACCESS_KEY = "07ada775-4cc0-4877-8aa6-55deb652253c"
+const SITE_KEY = '6LdbdUksAAAAAHH80K5Ye_EeubJnTHq3uAXWjlYx'
 
 const form = ref({
   fullName: '',
@@ -81,20 +82,63 @@ const form = ref({
 const isSubmitting = ref(false)
 const showAlert = ref(false)
 const alertMessage = ref('')
+const recaptchaContainer = ref(null)
+const recaptchaWidgetId = ref(null)
+const recaptchaToken = ref('')
 
 const notyf = new Notyf()
 
-const handleSubmit = async () => {
-  const response = grecaptcha.getResponse();
-  if (response.length === 0) {
-    notyf.error("Please complete the captcha");
-    return;
+function onRecaptchaSuccess(token) {
+  recaptchaToken.value = token
+}
+
+function onRecaptchaExpired() {
+  recaptchaToken.value = ''
+}
+
+function renderRecaptcha() {
+  if (!window.grecaptcha) {
+    console.error('reCAPTCHA not loaded')
+    return
   }
-  
+
+  recaptchaWidgetId.value = window.grecaptcha.render(recaptchaContainer.value, {
+    sitekey: SITE_KEY,
+    size: 'normal',
+    callback: onRecaptchaSuccess,
+    'expired-callback': onRecaptchaExpired,
+  })
+}
+
+function resetRecaptcha() {
+  if (recaptchaWidgetId.value !== null) {
+    window.grecaptcha.reset(recaptchaWidgetId.value)
+    recaptchaToken.value = ''
+  }
+}
+
+onMounted(() => {
+  const interval = setInterval(() => {
+    if (window.grecaptcha && window.grecaptcha.render) {
+      renderRecaptcha()
+      clearInterval(interval)
+    }
+  }, 100)
+
+  onBeforeUnmount(() => {
+    clearInterval(interval)
+  })
+})
+
+const handleSubmit = async () => {
+  if (!recaptchaToken.value) {
+    notyf.error('Please verify that you are not a robot')
+    return
+  }
+
   isSubmitting.value = true
-  
   try {
-    const res = await fetch("https://api.web3forms.com/submit", {
+    const response = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -105,15 +149,13 @@ const handleSubmit = async () => {
         name: form.value.fullName,
         email: form.value.email,
         message: form.value.message,
-        "g-recaptcha-response": response,
       }),
     })
-    
-    const result = await res.json()
-    
+
+    const result = await response.json()
     if (result.success) {
       console.log(result)
-      grecaptcha.reset()
+      resetRecaptcha()
       form.value = {
         fullName: '',
         email: '',
