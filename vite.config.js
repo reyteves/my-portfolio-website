@@ -37,8 +37,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['vue', 'vue-router', 'bootstrap'],
-          icons: ['bootstrap-icons']
+          vendor: ['vue', 'vue-router', 'bootstrap']
         }
       }
     }
